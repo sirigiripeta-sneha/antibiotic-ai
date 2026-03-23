@@ -1,0 +1,1777 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Driven Antibiotic Resistance Surveillance</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['DM Sans', 'sans-serif'],
+            mono: ['Space Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { height: 100%; }
+    body { height: 100%; margin: 0; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 200, 180, 0.15); }
+      50% { box-shadow: 0 0 40px rgba(0, 200, 180, 0.3); }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes drawLine {
+      from { stroke-dashoffset: 300; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(400%); }
+    }
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.03; }
+      50% { opacity: 0.08; }
+    }
+
+    .anim-fade-up { animation: fadeInUp 0.8s ease-out both; }
+    .anim-fade-in { animation: fadeIn 0.6s ease-out both; }
+    .anim-slide-left { animation: slideInLeft 0.8s ease-out both; }
+    .anim-slide-right { animation: slideInRight 0.8s ease-out both; }
+    .anim-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
+    .anim-count { animation: countUp 0.6s ease-out both; }
+    .anim-float { animation: float 4s ease-in-out infinite; }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    .delay-6 { animation-delay: 0.6s; }
+    .delay-7 { animation-delay: 0.7s; }
+    .delay-8 { animation-delay: 0.8s; }
+
+    .scroll-reveal { opacity: 0; transform: translateY(30px); transition: all 0.7s ease-out; }
+    .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; width: 0;
+      height: 2px; background: #00C8B4; transition: width 0.3s ease;
+    }
+    .nav-link:hover::after { width: 100%; }
+
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(0,200,180,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,180,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridPulse 5s ease-in-out infinite;
+    }
+
+    .chart-bar { transition: height 0.8s ease-out; }
+    .heatmap-cell { transition: all 0.3s ease; }
+    .heatmap-cell:hover { transform: scale(1.15); filter: brightness(1.3); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00C8B4 0%, #0077B6 100%);
+      transition: all 0.3s ease; position: relative; overflow: hidden;
+    }
+    .btn-primary::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transition: left 0.5s ease;
+    }
+    .btn-primary:hover::before { left: 100%; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,200,180,0.35); }
+
+    .card-hover { transition: all 0.4s ease; }
+    .card-hover:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+
+    .step-connector {
+      background: linear-gradient(90deg, #00C8B4, #0077B6);
+      height: 2px; flex: 1; min-width: 20px; opacity: 0.4;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stat-ring { transition: stroke-dashoffset 1.5s ease-out; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a1628; }
+    ::-webkit-scrollbar-thumb { background: #0077B6; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00C8B4; }
+
+    .toast-notification {
+      position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+      transform: translateY(120px); opacity: 0;
+      transition: all 0.4s ease;
+    }
+    .toast-notification.show { transform: translateY(0); opacity: 1; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-[#0a1628] text-white font-sans">
+  <div id="app-wrapper" class="w-full h-full overflow-auto"><!-- Navigation -->
+   <nav id="main-nav" class="fixed top-0 w-full z-50 transition-all duration-500" style="background: rgba(10,22,40,0.7); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,200,180,0.08);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-2">
+       <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"><i data-lucide="shield-check" style="width:18px;height:18px;color:#fff;"></i>
+       </div><span class="font-bold text-sm tracking-wide">ARES<span class="text-[#00C8B4]">.AI</span></span>
+      </div>
+      <div class="hidden md:flex items-center gap-6"><a href="#about" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">About</a> <a href="#solution" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">Solution</a> <a href="#features" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">Features</a> <a href="#dashboard" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">Dashboard</a> <a href="#impact" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">Impact</a> <a href="#demo" class="btn-primary text-sm px-4 py-2 rounded-lg text-white font-medium">Request Demo</a>
+      </div><button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white"> <i data-lucide="menu" style="width:24px;height:24px;"></i> </button>
+     </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-2" style="background: rgba(10,22,40,0.95);"><a href="#about" class="block text-sm text-gray-300 hover:text-white py-2">About</a> <a href="#solution" class="block text-sm text-gray-300 hover:text-white py-2">Solution</a> <a href="#features" class="block text-sm text-gray-300 hover:text-white py-2">Features</a> <a href="#dashboard" class="block text-sm text-gray-300 hover:text-white py-2">Dashboard</a> <a href="#impact" class="block text-sm text-gray-300 hover:text-white py-2">Impact</a> <a href="#demo" class="block text-sm text-white font-medium py-2">Request Demo</a>
+    </div>
+   </nav><!-- Hero Section -->
+   <section id="hero" class="relative min-h-[100%] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 hero-grid"></div>
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse at 30% 50%, rgba(0,119,182,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(0,200,180,0.1) 0%, transparent 50%);"></div><!-- Animated DNA helix SVG background -->
+    <svg class="absolute right-0 top-1/4 opacity-10 anim-float" width="300" height="400" viewbox="0 0 300 400"><path d="M150 0 Q200 50 150 100 Q100 150 150 200 Q200 250 150 300 Q100 350 150 400" fill="none" stroke="#00C8B4" stroke-width="2" stroke-dasharray="8 4" /> <path d="M150 0 Q100 50 150 100 Q200 150 150 200 Q100 250 150 300 Q200 350 150 400" fill="none" stroke="#0077B6" stroke-width="2" stroke-dasharray="8 4" /> <circle cx="150" cy="50" r="3" fill="#00C8B4" opacity="0.6" /> <circle cx="150" cy="150" r="3" fill="#0077B6" opacity="0.6" /> <circle cx="150" cy="250" r="3" fill="#00C8B4" opacity="0.6" /> <circle cx="150" cy="350" r="3" fill="#0077B6" opacity="0.6" />
+    </svg>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
+     <div class="anim-fade-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#00C8B4]/30 bg-[#00C8B4]/10 mb-8"><span class="w-2 h-2 rounded-full bg-[#00C8B4] animate-pulse"></span> <span class="text-[#00C8B4] text-xs font-mono tracking-wider uppercase">Live Surveillance Active</span>
+     </div>
+     <h1 id="hero-title" class="anim-fade-up delay-1 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-6">AI-Driven Antibiotic<br><span style="background: linear-gradient(135deg, #00C8B4, #0077B6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Resistance Surveillance</span></h1>
+     <p id="hero-tagline" class="anim-fade-up delay-2 text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">Using AI to Predict, Monitor, and Combat Antibiotic Resistance Globally</p>
+     <div class="anim-fade-up delay-3 flex flex-col sm:flex-row items-center justify-center gap-4"><a href="#dashboard" class="btn-primary px-8 py-3.5 rounded-xl text-white font-semibold flex items-center gap-2"> Explore Platform <i data-lucide="arrow-right" style="width:18px;height:18px;"></i> </a> <a href="#about" class="px-8 py-3.5 rounded-xl border border-gray-600 hover:border-[#00C8B4] text-gray-300 hover:text-white font-medium transition-all flex items-center gap-2"> <i data-lucide="play-circle" style="width:18px;height:18px;"></i> Watch Overview </a>
+     </div><!-- Hero Stats -->
+     <div class="anim-fade-up delay-5 mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-lg mx-auto">
+      <div class="text-center">
+       <div class="text-2xl sm:text-3xl font-bold text-[#00C8B4] font-mono">
+        2.8M+
+       </div>
+       <div class="text-xs text-gray-500 mt-1">
+        Records Analyzed
+       </div>
+      </div>
+      <div class="text-center">
+       <div class="text-2xl sm:text-3xl font-bold text-[#0077B6] font-mono">
+        147
+       </div>
+       <div class="text-xs text-gray-500 mt-1">
+        Countries Tracked
+       </div>
+      </div>
+      <div class="text-center">
+       <div class="text-2xl sm:text-3xl font-bold text-[#00C8B4] font-mono">
+        94.7%
+       </div>
+       <div class="text-xs text-gray-500 mt-1">
+        Prediction Accuracy
+       </div>
+      </div>
+     </div>
+    </div><!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 anim-fade-in delay-8">
+     <div class="w-6 h-10 rounded-full border-2 border-gray-600 flex justify-center pt-2">
+      <div class="w-1 h-2 bg-[#00C8B4] rounded-full animate-bounce"></div>
+     </div>
+    </div>
+   </section><!-- About Section -->
+   <section id="about" class="py-20 sm:py-28 px-4 relative">
+    <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(0,119,182,0.05) 50%, transparent 100%);"></div>
+    <div class="max-w-6xl mx-auto relative">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Understanding the Crisis</span>
+      <h2 id="about-heading" class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">The Growing Threat</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="scroll-reveal">
+       <p class="text-gray-400 leading-relaxed text-lg mb-6">Antibiotic resistance occurs when bacteria evolve to survive the drugs designed to kill them. It's one of the greatest threats to global health, turning once-treatable infections into potential death sentences.</p>
+       <p class="text-gray-400 leading-relaxed mb-8">Each year, <span class="text-[#00C8B4] font-semibold">1.27 million deaths</span> are directly attributed to antimicrobial resistance. Without intervention, this number could reach <span class="text-[#00C8B4] font-semibold">10 million by 2050</span>, surpassing cancer as a leading cause of death.</p>
+       <div class="grid grid-cols-2 gap-4">
+        <div class="glass-card rounded-xl p-4 anim-pulse-glow">
+         <div class="text-2xl font-bold text-[#00C8B4] font-mono">
+          $100B+
+         </div>
+         <div class="text-xs text-gray-400 mt-1">
+          Annual Global Cost
+         </div>
+        </div>
+        <div class="glass-card rounded-xl p-4 anim-pulse-glow" style="animation-delay: 1s;">
+         <div class="text-2xl font-bold text-[#0077B6] font-mono">
+          700K
+         </div>
+         <div class="text-xs text-gray-400 mt-1">
+          Deaths Per Year (Current)
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="scroll-reveal"><!-- Resistance growth chart -->
+       <div class="glass-card rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-4"><span class="text-sm font-medium text-gray-300">Resistance Rate Trend</span> <span class="text-xs text-[#00C8B4] font-mono">2018-2024</span>
+        </div>
+        <svg viewbox="0 0 400 200" class="w-full"><defs>
+          <lineargradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+           <stop offset="0%" style="stop-color:#00C8B4;stop-opacity:0.3" />
+           <stop offset="100%" style="stop-color:#00C8B4;stop-opacity:0" />
+          </lineargradient>
+         </defs> <!-- Grid lines --> <line x1="40" y1="20" x2="40" y2="170" stroke="rgba(255,255,255,0.05)" stroke-width="1" /> <line x1="40" y1="170" x2="380" y2="170" stroke="rgba(255,255,255,0.05)" stroke-width="1" /> <line x1="40" y1="120" x2="380" y2="120" stroke="rgba(255,255,255,0.03)" stroke-width="1" stroke-dasharray="4" /> <line x1="40" y1="70" x2="380" y2="70" stroke="rgba(255,255,255,0.03)" stroke-width="1" stroke-dasharray="4" /> <!-- Area fill --> <path d="M40 150 L100 135 L160 120 L220 100 L280 75 L340 50 L380 35 L380 170 L40 170 Z" fill="url(#chartGrad)" /> <!-- Line --> <path d="M40 150 L100 135 L160 120 L220 100 L280 75 L340 50 L380 35" fill="none" stroke="#00C8B4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="300" stroke-dashoffset="300" style="animation: drawLine 2s ease-out 0.5s forwards;" /> <!-- Data points --> <circle cx="40" cy="150" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="100" cy="135" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="160" cy="120" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="220" cy="100" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="280" cy="75" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="340" cy="50" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="380" cy="35" r="4" fill="#00C8B4" stroke="#00C8B4" stroke-width="2" /> <!-- Labels --> <text x="40" y="188" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Space Mono">
+          2018
+         </text> <text x="160" y="188" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Space Mono">
+          2020
+         </text> <text x="280" y="188" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Space Mono">
+          2022
+         </text> <text x="380" y="188" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Space Mono">
+          2024
+         </text> <text x="15" y="155" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Space Mono">
+          20%
+         </text> <text x="15" y="75" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Space Mono">
+          60%
+         </text>
+        </svg>
+        <p class="text-xs text-gray-500 mt-2 text-center">Global antibiotic resistance rates rising year over year</p>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Solution Section -->
+   <section id="solution" class="py-20 sm:py-28 px-4 relative">
+    <div class="max-w-6xl mx-auto">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Our Approach</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">AI-Powered Solution</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid md:grid-cols-3 gap-6">
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 group">
+       <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.2));"><i data-lucide="database" style="width:24px;height:24px;color:#00C8B4;"></i>
+       </div>
+       <h3 class="text-lg font-bold mb-2">Hospital Data Analysis</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Ingests millions of antibiogram records, lab reports, and patient data from hospitals worldwide in real time.</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 group" style="transition-delay: 0.1s;">
+       <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.2));"><i data-lucide="brain" style="width:24px;height:24px;color:#0077B6;"></i>
+       </div>
+       <h3 class="text-lg font-bold mb-2">Predictive AI Models</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Deep learning algorithms detect emerging resistance patterns weeks before traditional methods identify them.</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 group" style="transition-delay: 0.2s;">
+       <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.2));"><i data-lucide="trending-up" style="width:24px;height:24px;color:#00C8B4;"></i>
+       </div>
+       <h3 class="text-lg font-bold mb-2">Trend Forecasting</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Maps resistance trends across geographies and time, enabling proactive public health responses.</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- Features Section -->
+   <section id="features" class="py-20 sm:py-28 px-4 relative">
+    <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(0,200,180,0.03) 50%, transparent 100%);"></div>
+    <div class="max-w-6xl mx-auto relative">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Capabilities</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">Platform Features</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"><!-- Feature 1 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="activity" style="width:28px;height:28px;color:#00C8B4;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Real-Time Surveillance</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Live monitoring dashboard tracking resistance patterns across hospital networks with sub-minute latency.</p>
+      </div><!-- Feature 2 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="cpu" style="width:28px;height:28px;color:#0077B6;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">AI-Based Predictions</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Machine learning models predict resistance emergence with 94.7% accuracy, enabling preventive action.</p>
+      </div><!-- Feature 3 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="map-pin" style="width:28px;height:28px;color:#00C8B4;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Geographic Tracking</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Interactive global heatmaps visualizing resistance hotspots and spread patterns across regions.</p>
+      </div><!-- Feature 4 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="bell" style="width:28px;height:28px;color:#0077B6;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Smart Alerts</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Automated alerts for high-risk zones, unusual resistance spikes, and emerging superbug threats.</p>
+      </div><!-- Feature 5 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="bar-chart-3" style="width:28px;height:28px;color:#00C8B4;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Data Visualization</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Rich charts, graphs, and interactive dashboards transforming complex data into actionable insights.</p>
+      </div><!-- Feature 6 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="file-text" style="width:28px;height:28px;color:#0077B6;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Automated Reports</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Generate compliance reports for WHO, CDC, and regional health authorities with one click.</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- How It Works Section -->
+   <section id="how-it-works" class="py-20 sm:py-28 px-4 relative">
+    <div class="max-w-6xl mx-auto">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Process</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">How It Works</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div><!-- Steps -->
+     <div class="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-0"><!-- Step 1 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.1));"><i data-lucide="upload-cloud" style="width:28px;height:28px;color:#00C8B4;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#00C8B4] text-[#0a1628] text-xs font-bold flex items-center justify-center">1</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">Data Collection</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">Hospital records, lab results, global databases</p>
+      </div>
+      <div class="step-connector hidden lg:block"></div>
+      <div class="w-px h-8 lg:hidden" style="background: linear-gradient(180deg, #00C8B4, #0077B6); opacity: 0.4;"></div><!-- Step 2 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.15), rgba(0,119,182,0.15));"><i data-lucide="cpu" style="width:28px;height:28px;color:#0077B6;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#0077B6] text-white text-xs font-bold flex items-center justify-center">2</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">AI Processing</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">ML models analyze and classify patterns</p>
+      </div>
+      <div class="step-connector hidden lg:block"></div>
+      <div class="w-px h-8 lg:hidden" style="background: linear-gradient(180deg, #00C8B4, #0077B6); opacity: 0.4;"></div><!-- Step 3 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.1));"><i data-lucide="search" style="width:28px;height:28px;color:#00C8B4;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#00C8B4] text-[#0a1628] text-xs font-bold flex items-center justify-center">3</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">Pattern Detection</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">Identify emerging resistance trends</p>
+      </div>
+      <div class="step-connector hidden lg:block"></div>
+      <div class="w-px h-8 lg:hidden" style="background: linear-gradient(180deg, #00C8B4, #0077B6); opacity: 0.4;"></div><!-- Step 4 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.15), rgba(0,119,182,0.15));"><i data-lucide="line-chart" style="width:28px;height:28px;color:#0077B6;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#0077B6] text-white text-xs font-bold flex items-center justify-center">4</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">Insights</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">Actionable intelligence &amp; visualizations</p>
+      </div>
+      <div class="step-connector hidden lg:block"></div>
+      <div class="w-px h-8 lg:hidden" style="background: linear-gradient(180deg, #00C8B4, #0077B6); opacity: 0.4;"></div><!-- Step 5 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.1));"><i data-lucide="bell" style="width:28px;height:28px;color:#00C8B4;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#00C8B4] text-[#0a1628] text-xs font-bold flex items-center justify-center">5</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">Alerts</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">Real-time notifications to stakeholders</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- Dashboard Preview Section -->
+   <section id="dashboard" class="py-20 sm:py-28 px-4 relative">
+    <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(0,119,182,0.05) 50%, transparent 100%);"></div>
+    <div class="max-w-6xl mx-auto relative">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Live Preview</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">Dashboard</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div><!-- Dashboard Mock -->
+     <div class="scroll-reveal glass-card rounded-2xl p-4 sm:p-6 anim-pulse-glow"><!-- Dashboard Top Bar -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+       <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-[#00C8B4] animate-pulse"></div><span class="text-sm font-medium text-gray-300">Surveillance Dashboard</span> <span class="text-xs text-gray-500 font-mono">Last updated: 2 min ago</span>
+       </div>
+       <div class="flex gap-2"><span class="px-3 py-1 rounded-lg text-xs font-mono bg-[#00C8B4]/10 text-[#00C8B4] border border-[#00C8B4]/20">Live</span> <span class="px-3 py-1 rounded-lg text-xs font-mono bg-[#0077B6]/10 text-[#0077B6] border border-[#0077B6]/20">Global</span>
+       </div>
+      </div><!-- Stats Row -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+       <div class="rounded-xl p-4" style="background: rgba(0,200,180,0.08); border: 1px solid rgba(0,200,180,0.15);">
+        <div class="flex items-center gap-2 mb-2"><i data-lucide="activity" style="width:14px;height:14px;color:#00C8B4;"></i> <span class="text-xs text-gray-400">Active Cases</span>
+        </div>
+        <div class="text-2xl font-bold font-mono text-[#00C8B4]">
+         12,847
+        </div>
+        <div class="flex items-center gap-1 mt-1"><i data-lucide="trending-up" style="width:12px;height:12px;color:#ef4444;"></i> <span class="text-xs text-red-400">+4.2%</span>
+        </div>
+       </div>
+       <div class="rounded-xl p-4" style="background: rgba(0,119,182,0.08); border: 1px solid rgba(0,119,182,0.15);">
+        <div class="flex items-center gap-2 mb-2"><i data-lucide="shield" style="width:14px;height:14px;color:#0077B6;"></i> <span class="text-xs text-gray-400">Resistance Rate</span>
+        </div>
+        <div class="text-2xl font-bold font-mono text-[#0077B6]">
+         34.2%
+        </div>
+        <div class="flex items-center gap-1 mt-1"><i data-lucide="trending-up" style="width:12px;height:12px;color:#ef4444;"></i> <span class="text-xs text-red-400">+1.8%</span>
+        </div>
+       </div>
+       <div class="rounded-xl p-4" style="background: rgba(0,200,180,0.08); border: 1px solid rgba(0,200,180,0.15);">
+        <div class="flex items-center gap-2 mb-2"><i data-lucide="alert-triangle" style="width:14px;height:14px;color:#f59e0b;"></i> <span class="text-xs text-gray-400">Active Alerts</span>
+        </div>
+        <div class="text-2xl font-bold font-mono text-amber-400">
+         23
+        </div>
+        <div class="flex items-center gap-1 mt-1"><i data-lucide="trending-down" style="width:12px;height:12px;color:#22c55e;"></i> <span class="text-xs text-green-400">-12%</span>
+        </div>
+       </div>
+       <div class="rounded-xl p-4" style="background: rgba(0,119,182,0.08); border: 1px solid rgba(0,119,182,0.15);">
+        <div class="flex items-center gap-2 mb-2"><i data-lucide="hospital" style="width:14px;height:14px;color:#0077B6;"></i> <span class="text-xs text-gray-400">Hospitals</span>
+        </div>
+        <div class="text-2xl font-bold font-mono text-[#0077B6]">
+         2,431
+        </div>
+        <div class="flex items-center gap-1 mt-1"><i data-lucide="trending-up" style="width:12px;height:12px;color:#22c55e;"></i> <span class="text-xs text-green-400">+89 new</span>
+        </div>
+       </div>
+      </div><!-- Charts Row -->
+      <div class="grid md:grid-cols-2 gap-4 mb-4"><!-- Bar Chart -->
+       <div class="rounded-xl p-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+        <div class="flex items-center justify-between mb-4"><span class="text-sm font-medium text-gray-300">Resistance by Pathogen</span> <i data-lucide="more-horizontal" style="width:16px;height:16px;color:#6b7280;"></i>
+        </div>
+        <div class="flex items-end gap-3 h-32">
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 80%; background: linear-gradient(180deg, #00C8B4, rgba(0,200,180,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">MRSA</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 65%; background: linear-gradient(180deg, #0077B6, rgba(0,119,182,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">E.coli</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 90%; background: linear-gradient(180deg, #00C8B4, rgba(0,200,180,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">K.pneu</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 45%; background: linear-gradient(180deg, #0077B6, rgba(0,119,182,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">P.aeru</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 70%; background: linear-gradient(180deg, #00C8B4, rgba(0,200,180,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">A.baum</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 55%; background: linear-gradient(180deg, #0077B6, rgba(0,119,182,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">S.pneu</span>
+         </div>
+        </div>
+       </div><!-- Heatmap -->
+       <div class="rounded-xl p-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+        <div class="flex items-center justify-between mb-4"><span class="text-sm font-medium text-gray-300">Regional Heatmap</span> <i data-lucide="more-horizontal" style="width:16px;height:16px;color:#6b7280;"></i>
+        </div>
+        <div class="grid grid-cols-7 gap-1" id="heatmap"><!-- Generated via JS -->
+        </div>
+        <div class="flex items-center justify-between mt-2"><span class="text-[9px] text-gray-500">Low</span>
+         <div class="flex gap-1">
+          <div class="w-4 h-2 rounded-sm" style="background: rgba(0,200,180,0.15);"></div>
+          <div class="w-4 h-2 rounded-sm" style="background: rgba(0,200,180,0.35);"></div>
+          <div class="w-4 h-2 rounded-sm" style="background: rgba(0,200,180,0.55);"></div>
+          <div class="w-4 h-2 rounded-sm" style="background: rgba(0,200,180,0.75);"></div>
+          <div class="w-4 h-2 rounded-sm" style="background: #00C8B4;"></div>
+         </div><span class="text-[9px] text-gray-500">High</span>
+        </div>
+       </div>
+      </div><!-- Alert Feed -->
+      <div class="rounded-xl p-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+       <div class="flex items-center justify-between mb-3"><span class="text-sm font-medium text-gray-300">Recent Alerts</span> <span class="text-xs text-[#00C8B4] font-mono cursor-pointer hover:underline">View All</span>
+       </div>
+       <div class="space-y-2">
+        <div class="flex items-center gap-3 p-2 rounded-lg" style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15);">
+         <div class="w-2 h-2 rounded-full bg-red-400 animate-pulse flex-shrink-0"></div><span class="text-xs text-gray-300 flex-1"><span class="text-red-400 font-semibold">CRITICAL</span> — MRSA resistance spike detected in Southeast Asia (+23%)</span> <span class="text-[10px] text-gray-500 font-mono flex-shrink-0">12m ago</span>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded-lg" style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.12);">
+         <div class="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></div><span class="text-xs text-gray-300 flex-1"><span class="text-amber-400 font-semibold">WARNING</span> — New carbapenem-resistant strain identified in Brazil</span> <span class="text-[10px] text-gray-500 font-mono flex-shrink-0">1h ago</span>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded-lg" style="background: rgba(0,200,180,0.06); border: 1px solid rgba(0,200,180,0.12);">
+         <div class="w-2 h-2 rounded-full bg-[#00C8B4] flex-shrink-0"></div><span class="text-xs text-gray-300 flex-1"><span class="text-[#00C8B4] font-semibold">INFO</span> — Weekly report generated for WHO European Region</span> <span class="text-[10px] text-gray-500 font-mono flex-shrink-0">3h ago</span>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Impact Section -->
+   <section id="impact" class="py-20 sm:py-28 px-4 relative">
+    <div class="max-w-6xl mx-auto">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Benefits</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">Real-World Impact</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid md:grid-cols-3 gap-6">
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-8 text-center">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, rgba(0,200,180,0.15), rgba(0,119,182,0.1));"><i data-lucide="hospital" style="width:32px;height:32px;color:#00C8B4;"></i>
+       </div>
+       <h3 class="text-xl font-bold mb-3">Hospitals</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Reduce treatment failures by up to 40%. Optimize antibiotic prescriptions with AI-guided recommendations tailored to local resistance data.</p>
+       <div class="mt-4 flex items-center justify-center gap-1 text-[#00C8B4] text-sm font-medium"><span>40% fewer failures</span> <i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i>
+       </div>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-8 text-center">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, rgba(0,119,182,0.15), rgba(0,200,180,0.1));"><i data-lucide="microscope" style="width:32px;height:32px;color:#0077B6;"></i>
+       </div>
+       <h3 class="text-xl font-bold mb-3">Researchers</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Access the world's largest real-time resistance dataset. Accelerate drug discovery pipelines and validate research hypotheses at scale.</p>
+       <div class="mt-4 flex items-center justify-center gap-1 text-[#0077B6] text-sm font-medium"><span>10× faster insights</span> <i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i>
+       </div>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-8 text-center">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, rgba(0,200,180,0.15), rgba(0,119,182,0.1));"><i data-lucide="landmark" style="width:32px;height:32px;color:#00C8B4;"></i>
+       </div>
+       <h3 class="text-xl font-bold mb-3">Governments</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Data-driven policy decisions for national antimicrobial stewardship programs. Allocate resources effectively to high-risk regions.</p>
+       <div class="mt-4 flex items-center justify-center gap-1 text-[#00C8B4] text-sm font-medium"><span>$2.1B potential savings</span> <i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Tech Stack Section -->
+   <section id="tech" class="py-20 sm:py-28 px-4 relative">
+    <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(0,200,180,0.03) 50%, transparent 100%);"></div>
+    <div class="max-w-6xl mx-auto relative">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Technology</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">Tech Stack</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        🧠
+       </div>
+       <h4 class="font-bold text-sm mb-1">TensorFlow</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">AI / ML</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        🔬
+       </div>
+       <h4 class="font-bold text-sm mb-1">PyTorch</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Deep Learning</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        ☁️
+       </div>
+       <h4 class="font-bold text-sm mb-1">AWS</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Cloud</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        📊
+       </div>
+       <h4 class="font-bold text-sm mb-1">Apache Kafka</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Streaming</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        🐍
+       </div>
+       <h4 class="font-bold text-sm mb-1">Python</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Backend</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        ⚛️
+       </div>
+       <h4 class="font-bold text-sm mb-1">React</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Frontend</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        🗄️
+       </div>
+       <h4 class="font-bold text-sm mb-1">PostgreSQL</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Database</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        📈
+       </div>
+       <h4 class="font-bold text-sm mb-1">D3.js</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Visualization</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- CTA Section -->
+   <section id="demo" class="py-20 sm:py-28 px-4 relative">
+    <div class="max-w-3xl mx-auto">
+     <div class="scroll-reveal glass-card rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden">
+      <div class="absolute inset-0" style="background: linear-gradient(135deg, rgba(0,200,180,0.08), rgba(0,119,182,0.08));"></div>
+      <div class="relative z-10">
+       <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"><i data-lucide="rocket" style="width:28px;height:28px;color:#fff;"></i>
+       </div>
+       <h2 id="cta-heading" class="text-3xl sm:text-4xl font-bold mb-4">Ready to Combat Resistance?</h2>
+       <p class="text-gray-400 mb-8 max-w-md mx-auto">Join the global network of healthcare institutions using AI to fight antibiotic resistance.</p>
+       <form id="demo-form" class="max-w-sm mx-auto space-y-3">
+        <div><label for="demo-name" class="sr-only">Full Name</label> <input type="text" id="demo-name" placeholder="Full Name" required class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C8B4] transition-all" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">
+        </div>
+        <div><label for="demo-email" class="sr-only">Email Address</label> <input type="email" id="demo-email" placeholder="Email Address" required class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C8B4] transition-all" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">
+        </div>
+        <div><label for="demo-org" class="sr-only">Organization</label> <input type="text" id="demo-org" placeholder="Organization" required class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C8B4] transition-all" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">
+        </div><button type="submit" id="cta-button" class="btn-primary w-full py-3.5 rounded-xl text-white font-semibold flex items-center justify-center gap-2"> <span id="cta-button-text">Request Demo</span> <i data-lucide="arrow-right" style="width:18px;height:18px;"></i> </button>
+       </form>
+       <div id="form-success" class="hidden mt-4 p-4 rounded-xl" style="background: rgba(0,200,180,0.1); border: 1px solid rgba(0,200,180,0.2);">
+        <div class="flex items-center justify-center gap-2 text-[#00C8B4]"><i data-lucide="check-circle" style="width:20px;height:20px;"></i> <span class="font-medium text-sm">Demo request submitted! We'll be in touch soon.</span>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Footer -->
+   <footer class="py-12 px-4 border-t border-gray-800/50">
+    <div class="max-w-6xl mx-auto">
+     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+      <div>
+       <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"><i data-lucide="shield-check" style="width:18px;height:18px;color:#fff;"></i>
+        </div><span class="font-bold text-sm">ARES<span class="text-[#00C8B4]">.AI</span></span>
+       </div>
+       <p class="text-gray-500 text-sm leading-relaxed">AI-powered surveillance for a world free from antibiotic resistance.</p>
+      </div>
+      <div>
+       <h4 class="font-bold text-sm mb-3">Platform</h4>
+       <ul class="space-y-2">
+        <li><a href="#features" class="text-gray-500 hover:text-[#00C8B4] text-sm transition-colors">Features</a></li>
+        <li><a href="#dashboard" class="text-gray-500 hover:text-[#00C8B4] text-sm transition-colors">Dashboard</a></li>
+        <li><a href="#tech" class="text-gray-500 hover:text-[#00C8B4] text-sm transition-colors">Tech Stack</a></li>
+       </ul>
+      </div>
+      <div>
+       <h4 class="font-bold text-sm mb-3">Resources</h4>
+       <ul class="space-y-2">
+        <li><span class="text-gray-500 text-sm">Documentation</span></li>
+        <li><span class="text-gray-500 text-sm">API Reference</span></li>
+        <li><span class="text-gray-500 text-sm">Research Papers</span></li>
+       </ul>
+      </div>
+      <div>
+       <h4 class="font-bold text-sm mb-3">Contact</h4>
+       <ul class="space-y-2">
+        <li class="flex items-center gap-2 text-gray-500 text-sm"><i data-lucide="mail" style="width:14px;height:14px;color:#00C8B4;"></i> contact@ares.ai</li>
+        <li class="flex items-center gap-2 text-gray-500 text-sm"><i data-lucide="map-pin" style="width:14px;height:14px;color:#00C8B4;"></i> Geneva, Switzerland</li>
+       </ul>
+       <div class="flex gap-3 mt-4"><a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors" style="background: rgba(255,255,255,0.05);"> <i data-lucide="twitter" style="width:14px;height:14px;color:#6b7280;"></i> </a> <a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors" style="background: rgba(255,255,255,0.05);"> <i data-lucide="linkedin" style="width:14px;height:14px;color:#6b7280;"></i> </a> <a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors" style="background: rgba(255,255,255,0.05);"> <i data-lucide="github" style="width:14px;height:14px;color:#6b7280;"></i> </a>
+       </div>
+      </div>
+     </div>
+     <div class="border-t border-gray-800/50 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3"><span class="text-xs text-gray-600">© 2024 ARES.AI — All Rights Reserved</span> <span class="text-xs text-gray-600">Built for Global Health 🌍</span>
+     </div>
+    </div>
+   </footer><!-- Toast Notification -->
+   <div id="toast" class="toast-notification glass-card rounded-xl px-5 py-3 flex items-center gap-3"><i data-lucide="check-circle" style="width:18px;height:18px;color:#00C8B4;"></i> <span id="toast-message" class="text-sm text-gray-200"></span>
+   </div>
+  </div>
+  <script>
+  // ===== Default Config =====
+  const defaultConfig = {
+    background_color: '#0a1628',
+    surface_color: '#111d32',
+    text_color: '#e5e7eb',
+    primary_action_color: '#00C8B4',
+    secondary_action_color: '#0077B6',
+    font_family: 'DM Sans',
+    font_size: 16,
+    hero_title: 'AI-Driven Antibiotic Resistance Surveillance',
+    hero_tagline: 'Using AI to Predict, Monitor, and Combat Antibiotic Resistance Globally',
+    about_heading: 'The Growing Threat',
+    cta_heading: 'Ready to Combat Resistance?',
+    cta_button_text: 'Request Demo'
+  };
+
+  // ===== Element SDK Init =====
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => {
+      const bg = config.background_color || defaultConfig.background_color;
+      const surface = config.surface_color || defaultConfig.surface_color;
+      const text = config.text_color || defaultConfig.text_color;
+      const primary = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondary = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const font = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+
+      // Background
+      document.body.style.background = bg;
+
+      // Surface cards
+      document.querySelectorAll('.glass-card').forEach(el => {
+        el.style.background = `${surface}cc`;
+        el.style.borderColor = `${primary}18`;
+      });
+
+      // Text color
+      document.querySelectorAll('h1, h2, h3, h4, p, span, a, label, button').forEach(el => {
+        if (!el.closest('.toast-notification') && !el.classList.contains('text-red-400') && !el.classList.contains('text-amber-400') && !el.classList.contains('text-green-400')) {
+          // Only override generic text, not status colors
+        }
+      });
+
+      // Primary action color - buttons and accents
+      document.querySelectorAll('.btn-primary').forEach(el => {
+        el.style.background = `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`;
+      });
+
+      // Font family
+      const fontStack = `${font}, DM Sans, sans-serif`;
+      document.body.style.fontFamily = fontStack;
+
+      // Font size scaling
+      document.querySelectorAll('#hero-title').forEach(el => {
+        el.style.fontFamily = fontStack;
+      });
+      document.querySelectorAll('h2').forEach(el => {
+        el.style.fontSize = `${baseSize * 2.5}px`;
+        el.style.fontFamily = fontStack;
+      });
+      document.querySelectorAll('h3').forEach(el => {
+        el.style.fontSize = `${baseSize * 1.25}px`;
+        el.style.fontFamily = fontStack;
+      });
+
+      // Text content updates
+      const heroTitle = document.getElementById('hero-title');
+      if (heroTitle) {
+        const title = config.hero_title || defaultConfig.hero_title;
+        const words = title.split(' ');
+        const mid = Math.ceil(words.length / 2);
+        heroTitle.innerHTML = words.slice(0, mid).join(' ') + '<br><span style="background: linear-gradient(135deg, ' + primary + ', ' + secondary + '); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">' + words.slice(mid).join(' ') + '</span>';
+      }
+
+      const heroTagline = document.getElementById('hero-tagline');
+      if (heroTagline) heroTagline.textContent = config.hero_tagline || defaultConfig.hero_tagline;
+
+      const aboutHeading = document.getElementById('about-heading');
+      if (aboutHeading) aboutHeading.textContent = config.about_heading || defaultConfig.about_heading;
+
+      const ctaHeading = document.getElementById('cta-heading');
+      if (ctaHeading) ctaHeading.textContent = config.cta_heading || defaultConfig.cta_heading;
+
+      const ctaBtn = document.getElementById('cta-button-text');
+      if (ctaBtn) ctaBtn.textContent = config.cta_button_text || defaultConfig.cta_button_text;
+
+      // Accent dividers
+      document.querySelectorAll('.w-16.h-1').forEach(el => {
+        el.style.background = `linear-gradient(90deg, ${primary}, ${secondary})`;
+      });
+    },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        {
+          get: () => config.background_color || defaultConfig.background_color,
+          set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+        },
+        {
+          get: () => config.surface_color || defaultConfig.surface_color,
+          set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
+        },
+        {
+          get: () => config.text_color || defaultConfig.text_color,
+          set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+        },
+        {
+          get: () => config.primary_action_color || defaultConfig.primary_action_color,
+          set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }
+        },
+        {
+          get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+          set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }
+        }
+      ],
+      borderables: [],
+      fontEditable: {
+        get: () => config.font_family || defaultConfig.font_family,
+        set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+      },
+      fontSizeable: {
+        get: () => config.font_size || defaultConfig.font_size,
+        set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+      }
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['hero_title', config.hero_title || defaultConfig.hero_title],
+      ['hero_tagline', config.hero_tagline || defaultConfig.hero_tagline],
+      ['about_heading', config.about_heading || defaultConfig.about_heading],
+      ['cta_heading', config.cta_heading || defaultConfig.cta_heading],
+      ['cta_button_text', config.cta_button_text || defaultConfig.cta_button_text]
+    ])
+  });
+
+  // ===== Heatmap Generation =====
+  function generateHeatmap() {
+    const container = document.getElementById('heatmap');
+    if (!container) return;
+    container.innerHTML = '';
+    const regions = ['NA', 'EU', 'AS', 'AF', 'SA', 'OC', 'ME'];
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 7; col++) {
+        const intensity = Math.random();
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell rounded-sm cursor-pointer';
+        cell.style.height = '20px';
+        cell.style.background = `rgba(0,200,180,${0.1 + intensity * 0.8})`;
+        cell.title = `${regions[col]} - Week ${row + 1}: ${(intensity * 100).toFixed(0)}% resistance`;
+        container.appendChild(cell);
+      }
+    }
+  }
+
+  // ===== Scroll Reveal =====
+  function setupScrollReveal() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+  }
+
+  // ===== Smooth Scroll =====
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Close mobile menu
+        document.getElementById('mobile-menu').classList.add('hidden');
+      }
+    });
+  });
+
+  // ===== Mobile Menu =====
+  document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+  });
+
+  // ===== Nav Scroll Effect =====
+  const appWrapper = document.getElementById('app-wrapper');
+  appWrapper.addEventListener('scroll', () => {
+    const nav = document.getElementById('main-nav');
+    if (appWrapper.scrollTop > 50) {
+      nav.style.background = 'rgba(10,22,40,0.95)';
+      nav.style.borderBottomColor = 'rgba(0,200,180,0.15)';
+    } else {
+      nav.style.background = 'rgba(10,22,40,0.7)';
+      nav.style.borderBottomColor = 'rgba(0,200,180,0.08)';
+    }
+  });
+
+  // ===== Toast =====
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-message').textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // ===== Demo Form =====
+  document.getElementById('demo-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    this.classList.add('hidden');
+    document.getElementById('form-success').classList.remove('hidden');
+    showToast('Demo request submitted successfully!');
+    lucide.createIcons();
+  });
+
+  // ===== Init =====
+  generateHeatmap();
+  setupScrollReveal();
+  lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e0fd25d75847f7b',t:'MTc3NDI5MzkyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html><!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Driven Antibiotic Resistance Surveillance</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['DM Sans', 'sans-serif'],
+            mono: ['Space Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { height: 100%; }
+    body { height: 100%; margin: 0; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 200, 180, 0.15); }
+      50% { box-shadow: 0 0 40px rgba(0, 200, 180, 0.3); }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes drawLine {
+      from { stroke-dashoffset: 300; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(400%); }
+    }
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.03; }
+      50% { opacity: 0.08; }
+    }
+
+    .anim-fade-up { animation: fadeInUp 0.8s ease-out both; }
+    .anim-fade-in { animation: fadeIn 0.6s ease-out both; }
+    .anim-slide-left { animation: slideInLeft 0.8s ease-out both; }
+    .anim-slide-right { animation: slideInRight 0.8s ease-out both; }
+    .anim-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
+    .anim-count { animation: countUp 0.6s ease-out both; }
+    .anim-float { animation: float 4s ease-in-out infinite; }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    .delay-6 { animation-delay: 0.6s; }
+    .delay-7 { animation-delay: 0.7s; }
+    .delay-8 { animation-delay: 0.8s; }
+
+    .scroll-reveal { opacity: 0; transform: translateY(30px); transition: all 0.7s ease-out; }
+    .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; width: 0;
+      height: 2px; background: #00C8B4; transition: width 0.3s ease;
+    }
+    .nav-link:hover::after { width: 100%; }
+
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(0,200,180,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,180,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridPulse 5s ease-in-out infinite;
+    }
+
+    .chart-bar { transition: height 0.8s ease-out; }
+    .heatmap-cell { transition: all 0.3s ease; }
+    .heatmap-cell:hover { transform: scale(1.15); filter: brightness(1.3); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00C8B4 0%, #0077B6 100%);
+      transition: all 0.3s ease; position: relative; overflow: hidden;
+    }
+    .btn-primary::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transition: left 0.5s ease;
+    }
+    .btn-primary:hover::before { left: 100%; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,200,180,0.35); }
+
+    .card-hover { transition: all 0.4s ease; }
+    .card-hover:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+
+    .step-connector {
+      background: linear-gradient(90deg, #00C8B4, #0077B6);
+      height: 2px; flex: 1; min-width: 20px; opacity: 0.4;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stat-ring { transition: stroke-dashoffset 1.5s ease-out; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a1628; }
+    ::-webkit-scrollbar-thumb { background: #0077B6; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00C8B4; }
+
+    .toast-notification {
+      position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+      transform: translateY(120px); opacity: 0;
+      transition: all 0.4s ease;
+    }
+    .toast-notification.show { transform: translateY(0); opacity: 1; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-[#0a1628] text-white font-sans">
+  <div id="app-wrapper" class="w-full h-full overflow-auto"><!-- Navigation -->
+   <nav id="main-nav" class="fixed top-0 w-full z-50 transition-all duration-500" style="background: rgba(10,22,40,0.7); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,200,180,0.08);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-2">
+       <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"><i data-lucide="shield-check" style="width:18px;height:18px;color:#fff;"></i>
+       </div><span class="font-bold text-sm tracking-wide">ARES<span class="text-[#00C8B4]">.AI</span></span>
+      </div>
+      <div class="hidden md:flex items-center gap-6"><a href="#about" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">About</a> <a href="#solution" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">Solution</a> <a href="#features" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">Features</a> <a href="#dashboard" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">Dashboard</a> <a href="#impact" class="nav-link text-sm text-gray-300 hover:text-white transition-colors">Impact</a> <a href="#demo" class="btn-primary text-sm px-4 py-2 rounded-lg text-white font-medium">Request Demo</a>
+      </div><button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white"> <i data-lucide="menu" style="width:24px;height:24px;"></i> </button>
+     </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-2" style="background: rgba(10,22,40,0.95);"><a href="#about" class="block text-sm text-gray-300 hover:text-white py-2">About</a> <a href="#solution" class="block text-sm text-gray-300 hover:text-white py-2">Solution</a> <a href="#features" class="block text-sm text-gray-300 hover:text-white py-2">Features</a> <a href="#dashboard" class="block text-sm text-gray-300 hover:text-white py-2">Dashboard</a> <a href="#impact" class="block text-sm text-gray-300 hover:text-white py-2">Impact</a> <a href="#demo" class="block text-sm text-white font-medium py-2">Request Demo</a>
+    </div>
+   </nav><!-- Hero Section -->
+   <section id="hero" class="relative min-h-[100%] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 hero-grid"></div>
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse at 30% 50%, rgba(0,119,182,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(0,200,180,0.1) 0%, transparent 50%);"></div><!-- Animated DNA helix SVG background -->
+    <svg class="absolute right-0 top-1/4 opacity-10 anim-float" width="300" height="400" viewbox="0 0 300 400"><path d="M150 0 Q200 50 150 100 Q100 150 150 200 Q200 250 150 300 Q100 350 150 400" fill="none" stroke="#00C8B4" stroke-width="2" stroke-dasharray="8 4" /> <path d="M150 0 Q100 50 150 100 Q200 150 150 200 Q100 250 150 300 Q200 350 150 400" fill="none" stroke="#0077B6" stroke-width="2" stroke-dasharray="8 4" /> <circle cx="150" cy="50" r="3" fill="#00C8B4" opacity="0.6" /> <circle cx="150" cy="150" r="3" fill="#0077B6" opacity="0.6" /> <circle cx="150" cy="250" r="3" fill="#00C8B4" opacity="0.6" /> <circle cx="150" cy="350" r="3" fill="#0077B6" opacity="0.6" />
+    </svg>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
+     <div class="anim-fade-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#00C8B4]/30 bg-[#00C8B4]/10 mb-8"><span class="w-2 h-2 rounded-full bg-[#00C8B4] animate-pulse"></span> <span class="text-[#00C8B4] text-xs font-mono tracking-wider uppercase">Live Surveillance Active</span>
+     </div>
+     <h1 id="hero-title" class="anim-fade-up delay-1 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-6">AI-Driven Antibiotic<br><span style="background: linear-gradient(135deg, #00C8B4, #0077B6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Resistance Surveillance</span></h1>
+     <p id="hero-tagline" class="anim-fade-up delay-2 text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">Using AI to Predict, Monitor, and Combat Antibiotic Resistance Globally</p>
+     <div class="anim-fade-up delay-3 flex flex-col sm:flex-row items-center justify-center gap-4"><a href="#dashboard" class="btn-primary px-8 py-3.5 rounded-xl text-white font-semibold flex items-center gap-2"> Explore Platform <i data-lucide="arrow-right" style="width:18px;height:18px;"></i> </a> <a href="#about" class="px-8 py-3.5 rounded-xl border border-gray-600 hover:border-[#00C8B4] text-gray-300 hover:text-white font-medium transition-all flex items-center gap-2"> <i data-lucide="play-circle" style="width:18px;height:18px;"></i> Watch Overview </a>
+     </div><!-- Hero Stats -->
+     <div class="anim-fade-up delay-5 mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-lg mx-auto">
+      <div class="text-center">
+       <div class="text-2xl sm:text-3xl font-bold text-[#00C8B4] font-mono">
+        2.8M+
+       </div>
+       <div class="text-xs text-gray-500 mt-1">
+        Records Analyzed
+       </div>
+      </div>
+      <div class="text-center">
+       <div class="text-2xl sm:text-3xl font-bold text-[#0077B6] font-mono">
+        147
+       </div>
+       <div class="text-xs text-gray-500 mt-1">
+        Countries Tracked
+       </div>
+      </div>
+      <div class="text-center">
+       <div class="text-2xl sm:text-3xl font-bold text-[#00C8B4] font-mono">
+        94.7%
+       </div>
+       <div class="text-xs text-gray-500 mt-1">
+        Prediction Accuracy
+       </div>
+      </div>
+     </div>
+    </div><!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 anim-fade-in delay-8">
+     <div class="w-6 h-10 rounded-full border-2 border-gray-600 flex justify-center pt-2">
+      <div class="w-1 h-2 bg-[#00C8B4] rounded-full animate-bounce"></div>
+     </div>
+    </div>
+   </section><!-- About Section -->
+   <section id="about" class="py-20 sm:py-28 px-4 relative">
+    <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(0,119,182,0.05) 50%, transparent 100%);"></div>
+    <div class="max-w-6xl mx-auto relative">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Understanding the Crisis</span>
+      <h2 id="about-heading" class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">The Growing Threat</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="scroll-reveal">
+       <p class="text-gray-400 leading-relaxed text-lg mb-6">Antibiotic resistance occurs when bacteria evolve to survive the drugs designed to kill them. It's one of the greatest threats to global health, turning once-treatable infections into potential death sentences.</p>
+       <p class="text-gray-400 leading-relaxed mb-8">Each year, <span class="text-[#00C8B4] font-semibold">1.27 million deaths</span> are directly attributed to antimicrobial resistance. Without intervention, this number could reach <span class="text-[#00C8B4] font-semibold">10 million by 2050</span>, surpassing cancer as a leading cause of death.</p>
+       <div class="grid grid-cols-2 gap-4">
+        <div class="glass-card rounded-xl p-4 anim-pulse-glow">
+         <div class="text-2xl font-bold text-[#00C8B4] font-mono">
+          $100B+
+         </div>
+         <div class="text-xs text-gray-400 mt-1">
+          Annual Global Cost
+         </div>
+        </div>
+        <div class="glass-card rounded-xl p-4 anim-pulse-glow" style="animation-delay: 1s;">
+         <div class="text-2xl font-bold text-[#0077B6] font-mono">
+          700K
+         </div>
+         <div class="text-xs text-gray-400 mt-1">
+          Deaths Per Year (Current)
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="scroll-reveal"><!-- Resistance growth chart -->
+       <div class="glass-card rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-4"><span class="text-sm font-medium text-gray-300">Resistance Rate Trend</span> <span class="text-xs text-[#00C8B4] font-mono">2018-2024</span>
+        </div>
+        <svg viewbox="0 0 400 200" class="w-full"><defs>
+          <lineargradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+           <stop offset="0%" style="stop-color:#00C8B4;stop-opacity:0.3" />
+           <stop offset="100%" style="stop-color:#00C8B4;stop-opacity:0" />
+          </lineargradient>
+         </defs> <!-- Grid lines --> <line x1="40" y1="20" x2="40" y2="170" stroke="rgba(255,255,255,0.05)" stroke-width="1" /> <line x1="40" y1="170" x2="380" y2="170" stroke="rgba(255,255,255,0.05)" stroke-width="1" /> <line x1="40" y1="120" x2="380" y2="120" stroke="rgba(255,255,255,0.03)" stroke-width="1" stroke-dasharray="4" /> <line x1="40" y1="70" x2="380" y2="70" stroke="rgba(255,255,255,0.03)" stroke-width="1" stroke-dasharray="4" /> <!-- Area fill --> <path d="M40 150 L100 135 L160 120 L220 100 L280 75 L340 50 L380 35 L380 170 L40 170 Z" fill="url(#chartGrad)" /> <!-- Line --> <path d="M40 150 L100 135 L160 120 L220 100 L280 75 L340 50 L380 35" fill="none" stroke="#00C8B4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="300" stroke-dashoffset="300" style="animation: drawLine 2s ease-out 0.5s forwards;" /> <!-- Data points --> <circle cx="40" cy="150" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="100" cy="135" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="160" cy="120" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="220" cy="100" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="280" cy="75" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="340" cy="50" r="4" fill="#0a1628" stroke="#00C8B4" stroke-width="2" /> <circle cx="380" cy="35" r="4" fill="#00C8B4" stroke="#00C8B4" stroke-width="2" /> <!-- Labels --> <text x="40" y="188" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Space Mono">
+          2018
+         </text> <text x="160" y="188" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Space Mono">
+          2020
+         </text> <text x="280" y="188" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Space Mono">
+          2022
+         </text> <text x="380" y="188" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Space Mono">
+          2024
+         </text> <text x="15" y="155" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Space Mono">
+          20%
+         </text> <text x="15" y="75" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Space Mono">
+          60%
+         </text>
+        </svg>
+        <p class="text-xs text-gray-500 mt-2 text-center">Global antibiotic resistance rates rising year over year</p>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Solution Section -->
+   <section id="solution" class="py-20 sm:py-28 px-4 relative">
+    <div class="max-w-6xl mx-auto">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Our Approach</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">AI-Powered Solution</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid md:grid-cols-3 gap-6">
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 group">
+       <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.2));"><i data-lucide="database" style="width:24px;height:24px;color:#00C8B4;"></i>
+       </div>
+       <h3 class="text-lg font-bold mb-2">Hospital Data Analysis</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Ingests millions of antibiogram records, lab reports, and patient data from hospitals worldwide in real time.</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 group" style="transition-delay: 0.1s;">
+       <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.2));"><i data-lucide="brain" style="width:24px;height:24px;color:#0077B6;"></i>
+       </div>
+       <h3 class="text-lg font-bold mb-2">Predictive AI Models</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Deep learning algorithms detect emerging resistance patterns weeks before traditional methods identify them.</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 group" style="transition-delay: 0.2s;">
+       <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.2));"><i data-lucide="trending-up" style="width:24px;height:24px;color:#00C8B4;"></i>
+       </div>
+       <h3 class="text-lg font-bold mb-2">Trend Forecasting</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Maps resistance trends across geographies and time, enabling proactive public health responses.</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- Features Section -->
+   <section id="features" class="py-20 sm:py-28 px-4 relative">
+    <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(0,200,180,0.03) 50%, transparent 100%);"></div>
+    <div class="max-w-6xl mx-auto relative">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Capabilities</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">Platform Features</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"><!-- Feature 1 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="activity" style="width:28px;height:28px;color:#00C8B4;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Real-Time Surveillance</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Live monitoring dashboard tracking resistance patterns across hospital networks with sub-minute latency.</p>
+      </div><!-- Feature 2 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="cpu" style="width:28px;height:28px;color:#0077B6;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">AI-Based Predictions</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Machine learning models predict resistance emergence with 94.7% accuracy, enabling preventive action.</p>
+      </div><!-- Feature 3 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="map-pin" style="width:28px;height:28px;color:#00C8B4;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Geographic Tracking</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Interactive global heatmaps visualizing resistance hotspots and spread patterns across regions.</p>
+      </div><!-- Feature 4 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="bell" style="width:28px;height:28px;color:#0077B6;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Smart Alerts</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Automated alerts for high-risk zones, unusual resistance spikes, and emerging superbug threats.</p>
+      </div><!-- Feature 5 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="bar-chart-3" style="width:28px;height:28px;color:#00C8B4;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Data Visualization</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Rich charts, graphs, and interactive dashboards transforming complex data into actionable insights.</p>
+      </div><!-- Feature 6 -->
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-6 relative overflow-hidden group">
+       <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10 group-hover:opacity-20 transition-opacity" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"></div><i data-lucide="file-text" style="width:28px;height:28px;color:#0077B6;" class="mb-4"></i>
+       <h3 class="font-bold mb-2">Automated Reports</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Generate compliance reports for WHO, CDC, and regional health authorities with one click.</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- How It Works Section -->
+   <section id="how-it-works" class="py-20 sm:py-28 px-4 relative">
+    <div class="max-w-6xl mx-auto">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Process</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">How It Works</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div><!-- Steps -->
+     <div class="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-0"><!-- Step 1 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.1));"><i data-lucide="upload-cloud" style="width:28px;height:28px;color:#00C8B4;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#00C8B4] text-[#0a1628] text-xs font-bold flex items-center justify-center">1</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">Data Collection</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">Hospital records, lab results, global databases</p>
+      </div>
+      <div class="step-connector hidden lg:block"></div>
+      <div class="w-px h-8 lg:hidden" style="background: linear-gradient(180deg, #00C8B4, #0077B6); opacity: 0.4;"></div><!-- Step 2 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.15), rgba(0,119,182,0.15));"><i data-lucide="cpu" style="width:28px;height:28px;color:#0077B6;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#0077B6] text-white text-xs font-bold flex items-center justify-center">2</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">AI Processing</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">ML models analyze and classify patterns</p>
+      </div>
+      <div class="step-connector hidden lg:block"></div>
+      <div class="w-px h-8 lg:hidden" style="background: linear-gradient(180deg, #00C8B4, #0077B6); opacity: 0.4;"></div><!-- Step 3 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.1));"><i data-lucide="search" style="width:28px;height:28px;color:#00C8B4;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#00C8B4] text-[#0a1628] text-xs font-bold flex items-center justify-center">3</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">Pattern Detection</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">Identify emerging resistance trends</p>
+      </div>
+      <div class="step-connector hidden lg:block"></div>
+      <div class="w-px h-8 lg:hidden" style="background: linear-gradient(180deg, #00C8B4, #0077B6); opacity: 0.4;"></div><!-- Step 4 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.15), rgba(0,119,182,0.15));"><i data-lucide="line-chart" style="width:28px;height:28px;color:#0077B6;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#0077B6] text-white text-xs font-bold flex items-center justify-center">4</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">Insights</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">Actionable intelligence &amp; visualizations</p>
+      </div>
+      <div class="step-connector hidden lg:block"></div>
+      <div class="w-px h-8 lg:hidden" style="background: linear-gradient(180deg, #00C8B4, #0077B6); opacity: 0.4;"></div><!-- Step 5 -->
+      <div class="scroll-reveal flex flex-col items-center text-center w-full lg:w-auto lg:flex-1">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 relative" style="background: linear-gradient(135deg, rgba(0,200,180,0.2), rgba(0,119,182,0.1));"><i data-lucide="bell" style="width:28px;height:28px;color:#00C8B4;"></i> <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#00C8B4] text-[#0a1628] text-xs font-bold flex items-center justify-center">5</span>
+       </div>
+       <h4 class="font-bold text-sm mb-1">Alerts</h4>
+       <p class="text-xs text-gray-500 max-w-[140px]">Real-time notifications to stakeholders</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- Dashboard Preview Section -->
+   <section id="dashboard" class="py-20 sm:py-28 px-4 relative">
+    <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(0,119,182,0.05) 50%, transparent 100%);"></div>
+    <div class="max-w-6xl mx-auto relative">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Live Preview</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">Dashboard</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div><!-- Dashboard Mock -->
+     <div class="scroll-reveal glass-card rounded-2xl p-4 sm:p-6 anim-pulse-glow"><!-- Dashboard Top Bar -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+       <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-[#00C8B4] animate-pulse"></div><span class="text-sm font-medium text-gray-300">Surveillance Dashboard</span> <span class="text-xs text-gray-500 font-mono">Last updated: 2 min ago</span>
+       </div>
+       <div class="flex gap-2"><span class="px-3 py-1 rounded-lg text-xs font-mono bg-[#00C8B4]/10 text-[#00C8B4] border border-[#00C8B4]/20">Live</span> <span class="px-3 py-1 rounded-lg text-xs font-mono bg-[#0077B6]/10 text-[#0077B6] border border-[#0077B6]/20">Global</span>
+       </div>
+      </div><!-- Stats Row -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+       <div class="rounded-xl p-4" style="background: rgba(0,200,180,0.08); border: 1px solid rgba(0,200,180,0.15);">
+        <div class="flex items-center gap-2 mb-2"><i data-lucide="activity" style="width:14px;height:14px;color:#00C8B4;"></i> <span class="text-xs text-gray-400">Active Cases</span>
+        </div>
+        <div class="text-2xl font-bold font-mono text-[#00C8B4]">
+         12,847
+        </div>
+        <div class="flex items-center gap-1 mt-1"><i data-lucide="trending-up" style="width:12px;height:12px;color:#ef4444;"></i> <span class="text-xs text-red-400">+4.2%</span>
+        </div>
+       </div>
+       <div class="rounded-xl p-4" style="background: rgba(0,119,182,0.08); border: 1px solid rgba(0,119,182,0.15);">
+        <div class="flex items-center gap-2 mb-2"><i data-lucide="shield" style="width:14px;height:14px;color:#0077B6;"></i> <span class="text-xs text-gray-400">Resistance Rate</span>
+        </div>
+        <div class="text-2xl font-bold font-mono text-[#0077B6]">
+         34.2%
+        </div>
+        <div class="flex items-center gap-1 mt-1"><i data-lucide="trending-up" style="width:12px;height:12px;color:#ef4444;"></i> <span class="text-xs text-red-400">+1.8%</span>
+        </div>
+       </div>
+       <div class="rounded-xl p-4" style="background: rgba(0,200,180,0.08); border: 1px solid rgba(0,200,180,0.15);">
+        <div class="flex items-center gap-2 mb-2"><i data-lucide="alert-triangle" style="width:14px;height:14px;color:#f59e0b;"></i> <span class="text-xs text-gray-400">Active Alerts</span>
+        </div>
+        <div class="text-2xl font-bold font-mono text-amber-400">
+         23
+        </div>
+        <div class="flex items-center gap-1 mt-1"><i data-lucide="trending-down" style="width:12px;height:12px;color:#22c55e;"></i> <span class="text-xs text-green-400">-12%</span>
+        </div>
+       </div>
+       <div class="rounded-xl p-4" style="background: rgba(0,119,182,0.08); border: 1px solid rgba(0,119,182,0.15);">
+        <div class="flex items-center gap-2 mb-2"><i data-lucide="hospital" style="width:14px;height:14px;color:#0077B6;"></i> <span class="text-xs text-gray-400">Hospitals</span>
+        </div>
+        <div class="text-2xl font-bold font-mono text-[#0077B6]">
+         2,431
+        </div>
+        <div class="flex items-center gap-1 mt-1"><i data-lucide="trending-up" style="width:12px;height:12px;color:#22c55e;"></i> <span class="text-xs text-green-400">+89 new</span>
+        </div>
+       </div>
+      </div><!-- Charts Row -->
+      <div class="grid md:grid-cols-2 gap-4 mb-4"><!-- Bar Chart -->
+       <div class="rounded-xl p-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+        <div class="flex items-center justify-between mb-4"><span class="text-sm font-medium text-gray-300">Resistance by Pathogen</span> <i data-lucide="more-horizontal" style="width:16px;height:16px;color:#6b7280;"></i>
+        </div>
+        <div class="flex items-end gap-3 h-32">
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 80%; background: linear-gradient(180deg, #00C8B4, rgba(0,200,180,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">MRSA</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 65%; background: linear-gradient(180deg, #0077B6, rgba(0,119,182,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">E.coli</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 90%; background: linear-gradient(180deg, #00C8B4, rgba(0,200,180,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">K.pneu</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 45%; background: linear-gradient(180deg, #0077B6, rgba(0,119,182,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">P.aeru</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 70%; background: linear-gradient(180deg, #00C8B4, rgba(0,200,180,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">A.baum</span>
+         </div>
+         <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full rounded-t-md chart-bar" style="height: 55%; background: linear-gradient(180deg, #0077B6, rgba(0,119,182,0.3));"></div><span class="text-[9px] text-gray-500 font-mono">S.pneu</span>
+         </div>
+        </div>
+       </div><!-- Heatmap -->
+       <div class="rounded-xl p-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+        <div class="flex items-center justify-between mb-4"><span class="text-sm font-medium text-gray-300">Regional Heatmap</span> <i data-lucide="more-horizontal" style="width:16px;height:16px;color:#6b7280;"></i>
+        </div>
+        <div class="grid grid-cols-7 gap-1" id="heatmap"><!-- Generated via JS -->
+        </div>
+        <div class="flex items-center justify-between mt-2"><span class="text-[9px] text-gray-500">Low</span>
+         <div class="flex gap-1">
+          <div class="w-4 h-2 rounded-sm" style="background: rgba(0,200,180,0.15);"></div>
+          <div class="w-4 h-2 rounded-sm" style="background: rgba(0,200,180,0.35);"></div>
+          <div class="w-4 h-2 rounded-sm" style="background: rgba(0,200,180,0.55);"></div>
+          <div class="w-4 h-2 rounded-sm" style="background: rgba(0,200,180,0.75);"></div>
+          <div class="w-4 h-2 rounded-sm" style="background: #00C8B4;"></div>
+         </div><span class="text-[9px] text-gray-500">High</span>
+        </div>
+       </div>
+      </div><!-- Alert Feed -->
+      <div class="rounded-xl p-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+       <div class="flex items-center justify-between mb-3"><span class="text-sm font-medium text-gray-300">Recent Alerts</span> <span class="text-xs text-[#00C8B4] font-mono cursor-pointer hover:underline">View All</span>
+       </div>
+       <div class="space-y-2">
+        <div class="flex items-center gap-3 p-2 rounded-lg" style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15);">
+         <div class="w-2 h-2 rounded-full bg-red-400 animate-pulse flex-shrink-0"></div><span class="text-xs text-gray-300 flex-1"><span class="text-red-400 font-semibold">CRITICAL</span> — MRSA resistance spike detected in Southeast Asia (+23%)</span> <span class="text-[10px] text-gray-500 font-mono flex-shrink-0">12m ago</span>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded-lg" style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.12);">
+         <div class="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></div><span class="text-xs text-gray-300 flex-1"><span class="text-amber-400 font-semibold">WARNING</span> — New carbapenem-resistant strain identified in Brazil</span> <span class="text-[10px] text-gray-500 font-mono flex-shrink-0">1h ago</span>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded-lg" style="background: rgba(0,200,180,0.06); border: 1px solid rgba(0,200,180,0.12);">
+         <div class="w-2 h-2 rounded-full bg-[#00C8B4] flex-shrink-0"></div><span class="text-xs text-gray-300 flex-1"><span class="text-[#00C8B4] font-semibold">INFO</span> — Weekly report generated for WHO European Region</span> <span class="text-[10px] text-gray-500 font-mono flex-shrink-0">3h ago</span>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Impact Section -->
+   <section id="impact" class="py-20 sm:py-28 px-4 relative">
+    <div class="max-w-6xl mx-auto">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Benefits</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">Real-World Impact</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid md:grid-cols-3 gap-6">
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-8 text-center">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, rgba(0,200,180,0.15), rgba(0,119,182,0.1));"><i data-lucide="hospital" style="width:32px;height:32px;color:#00C8B4;"></i>
+       </div>
+       <h3 class="text-xl font-bold mb-3">Hospitals</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Reduce treatment failures by up to 40%. Optimize antibiotic prescriptions with AI-guided recommendations tailored to local resistance data.</p>
+       <div class="mt-4 flex items-center justify-center gap-1 text-[#00C8B4] text-sm font-medium"><span>40% fewer failures</span> <i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i>
+       </div>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-8 text-center">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, rgba(0,119,182,0.15), rgba(0,200,180,0.1));"><i data-lucide="microscope" style="width:32px;height:32px;color:#0077B6;"></i>
+       </div>
+       <h3 class="text-xl font-bold mb-3">Researchers</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Access the world's largest real-time resistance dataset. Accelerate drug discovery pipelines and validate research hypotheses at scale.</p>
+       <div class="mt-4 flex items-center justify-center gap-1 text-[#0077B6] text-sm font-medium"><span>10× faster insights</span> <i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i>
+       </div>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-2xl p-8 text-center">
+       <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, rgba(0,200,180,0.15), rgba(0,119,182,0.1));"><i data-lucide="landmark" style="width:32px;height:32px;color:#00C8B4;"></i>
+       </div>
+       <h3 class="text-xl font-bold mb-3">Governments</h3>
+       <p class="text-gray-400 text-sm leading-relaxed">Data-driven policy decisions for national antimicrobial stewardship programs. Allocate resources effectively to high-risk regions.</p>
+       <div class="mt-4 flex items-center justify-center gap-1 text-[#00C8B4] text-sm font-medium"><span>$2.1B potential savings</span> <i data-lucide="arrow-up-right" style="width:14px;height:14px;"></i>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Tech Stack Section -->
+   <section id="tech" class="py-20 sm:py-28 px-4 relative">
+    <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(0,200,180,0.03) 50%, transparent 100%);"></div>
+    <div class="max-w-6xl mx-auto relative">
+     <div class="scroll-reveal text-center mb-16"><span class="text-[#00C8B4] text-xs font-mono tracking-widest uppercase">Technology</span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 mb-4">Tech Stack</h2>
+      <div class="w-16 h-1 mx-auto rounded-full" style="background: linear-gradient(90deg, #00C8B4, #0077B6);"></div>
+     </div>
+     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        🧠
+       </div>
+       <h4 class="font-bold text-sm mb-1">TensorFlow</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">AI / ML</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        🔬
+       </div>
+       <h4 class="font-bold text-sm mb-1">PyTorch</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Deep Learning</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        ☁️
+       </div>
+       <h4 class="font-bold text-sm mb-1">AWS</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Cloud</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        📊
+       </div>
+       <h4 class="font-bold text-sm mb-1">Apache Kafka</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Streaming</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        🐍
+       </div>
+       <h4 class="font-bold text-sm mb-1">Python</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Backend</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        ⚛️
+       </div>
+       <h4 class="font-bold text-sm mb-1">React</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Frontend</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        🗄️
+       </div>
+       <h4 class="font-bold text-sm mb-1">PostgreSQL</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Database</p>
+      </div>
+      <div class="scroll-reveal glass-card card-hover rounded-xl p-5 text-center group">
+       <div class="text-2xl mb-2">
+        📈
+       </div>
+       <h4 class="font-bold text-sm mb-1">D3.js</h4>
+       <p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Visualization</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- CTA Section -->
+   <section id="demo" class="py-20 sm:py-28 px-4 relative">
+    <div class="max-w-3xl mx-auto">
+     <div class="scroll-reveal glass-card rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden">
+      <div class="absolute inset-0" style="background: linear-gradient(135deg, rgba(0,200,180,0.08), rgba(0,119,182,0.08));"></div>
+      <div class="relative z-10">
+       <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"><i data-lucide="rocket" style="width:28px;height:28px;color:#fff;"></i>
+       </div>
+       <h2 id="cta-heading" class="text-3xl sm:text-4xl font-bold mb-4">Ready to Combat Resistance?</h2>
+       <p class="text-gray-400 mb-8 max-w-md mx-auto">Join the global network of healthcare institutions using AI to fight antibiotic resistance.</p>
+       <form id="demo-form" class="max-w-sm mx-auto space-y-3">
+        <div><label for="demo-name" class="sr-only">Full Name</label> <input type="text" id="demo-name" placeholder="Full Name" required class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C8B4] transition-all" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">
+        </div>
+        <div><label for="demo-email" class="sr-only">Email Address</label> <input type="email" id="demo-email" placeholder="Email Address" required class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C8B4] transition-all" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">
+        </div>
+        <div><label for="demo-org" class="sr-only">Organization</label> <input type="text" id="demo-org" placeholder="Organization" required class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C8B4] transition-all" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">
+        </div><button type="submit" id="cta-button" class="btn-primary w-full py-3.5 rounded-xl text-white font-semibold flex items-center justify-center gap-2"> <span id="cta-button-text">Request Demo</span> <i data-lucide="arrow-right" style="width:18px;height:18px;"></i> </button>
+       </form>
+       <div id="form-success" class="hidden mt-4 p-4 rounded-xl" style="background: rgba(0,200,180,0.1); border: 1px solid rgba(0,200,180,0.2);">
+        <div class="flex items-center justify-center gap-2 text-[#00C8B4]"><i data-lucide="check-circle" style="width:20px;height:20px;"></i> <span class="font-medium text-sm">Demo request submitted! We'll be in touch soon.</span>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Footer -->
+   <footer class="py-12 px-4 border-t border-gray-800/50">
+    <div class="max-w-6xl mx-auto">
+     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+      <div>
+       <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #00C8B4, #0077B6);"><i data-lucide="shield-check" style="width:18px;height:18px;color:#fff;"></i>
+        </div><span class="font-bold text-sm">ARES<span class="text-[#00C8B4]">.AI</span></span>
+       </div>
+       <p class="text-gray-500 text-sm leading-relaxed">AI-powered surveillance for a world free from antibiotic resistance.</p>
+      </div>
+      <div>
+       <h4 class="font-bold text-sm mb-3">Platform</h4>
+       <ul class="space-y-2">
+        <li><a href="#features" class="text-gray-500 hover:text-[#00C8B4] text-sm transition-colors">Features</a></li>
+        <li><a href="#dashboard" class="text-gray-500 hover:text-[#00C8B4] text-sm transition-colors">Dashboard</a></li>
+        <li><a href="#tech" class="text-gray-500 hover:text-[#00C8B4] text-sm transition-colors">Tech Stack</a></li>
+       </ul>
+      </div>
+      <div>
+       <h4 class="font-bold text-sm mb-3">Resources</h4>
+       <ul class="space-y-2">
+        <li><span class="text-gray-500 text-sm">Documentation</span></li>
+        <li><span class="text-gray-500 text-sm">API Reference</span></li>
+        <li><span class="text-gray-500 text-sm">Research Papers</span></li>
+       </ul>
+      </div>
+      <div>
+       <h4 class="font-bold text-sm mb-3">Contact</h4>
+       <ul class="space-y-2">
+        <li class="flex items-center gap-2 text-gray-500 text-sm"><i data-lucide="mail" style="width:14px;height:14px;color:#00C8B4;"></i> contact@ares.ai</li>
+        <li class="flex items-center gap-2 text-gray-500 text-sm"><i data-lucide="map-pin" style="width:14px;height:14px;color:#00C8B4;"></i> Geneva, Switzerland</li>
+       </ul>
+       <div class="flex gap-3 mt-4"><a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors" style="background: rgba(255,255,255,0.05);"> <i data-lucide="twitter" style="width:14px;height:14px;color:#6b7280;"></i> </a> <a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors" style="background: rgba(255,255,255,0.05);"> <i data-lucide="linkedin" style="width:14px;height:14px;color:#6b7280;"></i> </a> <a href="#" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors" style="background: rgba(255,255,255,0.05);"> <i data-lucide="github" style="width:14px;height:14px;color:#6b7280;"></i> </a>
+       </div>
+      </div>
+     </div>
+     <div class="border-t border-gray-800/50 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3"><span class="text-xs text-gray-600">© 2024 ARES.AI — All Rights Reserved</span> <span class="text-xs text-gray-600">Built for Global Health 🌍</span>
+     </div>
+    </div>
+   </footer><!-- Toast Notification -->
+   <div id="toast" class="toast-notification glass-card rounded-xl px-5 py-3 flex items-center gap-3"><i data-lucide="check-circle" style="width:18px;height:18px;color:#00C8B4;"></i> <span id="toast-message" class="text-sm text-gray-200"></span>
+   </div>
+  </div>
+  <script>
+  // ===== Default Config =====
+  const defaultConfig = {
+    background_color: '#0a1628',
+    surface_color: '#111d32',
+    text_color: '#e5e7eb',
+    primary_action_color: '#00C8B4',
+    secondary_action_color: '#0077B6',
+    font_family: 'DM Sans',
+    font_size: 16,
+    hero_title: 'AI-Driven Antibiotic Resistance Surveillance',
+    hero_tagline: 'Using AI to Predict, Monitor, and Combat Antibiotic Resistance Globally',
+    about_heading: 'The Growing Threat',
+    cta_heading: 'Ready to Combat Resistance?',
+    cta_button_text: 'Request Demo'
+  };
+
+  // ===== Element SDK Init =====
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => {
+      const bg = config.background_color || defaultConfig.background_color;
+      const surface = config.surface_color || defaultConfig.surface_color;
+      const text = config.text_color || defaultConfig.text_color;
+      const primary = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondary = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const font = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+
+      // Background
+      document.body.style.background = bg;
+
+      // Surface cards
+      document.querySelectorAll('.glass-card').forEach(el => {
+        el.style.background = `${surface}cc`;
+        el.style.borderColor = `${primary}18`;
+      });
+
+      // Text color
+      document.querySelectorAll('h1, h2, h3, h4, p, span, a, label, button').forEach(el => {
+        if (!el.closest('.toast-notification') && !el.classList.contains('text-red-400') && !el.classList.contains('text-amber-400') && !el.classList.contains('text-green-400')) {
+          // Only override generic text, not status colors
+        }
+      });
+
+      // Primary action color - buttons and accents
+      document.querySelectorAll('.btn-primary').forEach(el => {
+        el.style.background = `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`;
+      });
+
+      // Font family
+      const fontStack = `${font}, DM Sans, sans-serif`;
+      document.body.style.fontFamily = fontStack;
+
+      // Font size scaling
+      document.querySelectorAll('#hero-title').forEach(el => {
+        el.style.fontFamily = fontStack;
+      });
+      document.querySelectorAll('h2').forEach(el => {
+        el.style.fontSize = `${baseSize * 2.5}px`;
+        el.style.fontFamily = fontStack;
+      });
+      document.querySelectorAll('h3').forEach(el => {
+        el.style.fontSize = `${baseSize * 1.25}px`;
+        el.style.fontFamily = fontStack;
+      });
+
+      // Text content updates
+      const heroTitle = document.getElementById('hero-title');
+      if (heroTitle) {
+        const title = config.hero_title || defaultConfig.hero_title;
+        const words = title.split(' ');
+        const mid = Math.ceil(words.length / 2);
+        heroTitle.innerHTML = words.slice(0, mid).join(' ') + '<br><span style="background: linear-gradient(135deg, ' + primary + ', ' + secondary + '); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">' + words.slice(mid).join(' ') + '</span>';
+      }
+
+      const heroTagline = document.getElementById('hero-tagline');
+      if (heroTagline) heroTagline.textContent = config.hero_tagline || defaultConfig.hero_tagline;
+
+      const aboutHeading = document.getElementById('about-heading');
+      if (aboutHeading) aboutHeading.textContent = config.about_heading || defaultConfig.about_heading;
+
+      const ctaHeading = document.getElementById('cta-heading');
+      if (ctaHeading) ctaHeading.textContent = config.cta_heading || defaultConfig.cta_heading;
+
+      const ctaBtn = document.getElementById('cta-button-text');
+      if (ctaBtn) ctaBtn.textContent = config.cta_button_text || defaultConfig.cta_button_text;
+
+      // Accent dividers
+      document.querySelectorAll('.w-16.h-1').forEach(el => {
+        el.style.background = `linear-gradient(90deg, ${primary}, ${secondary})`;
+      });
+    },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        {
+          get: () => config.background_color || defaultConfig.background_color,
+          set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+        },
+        {
+          get: () => config.surface_color || defaultConfig.surface_color,
+          set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
+        },
+        {
+          get: () => config.text_color || defaultConfig.text_color,
+          set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+        },
+        {
+          get: () => config.primary_action_color || defaultConfig.primary_action_color,
+          set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }
+        },
+        {
+          get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+          set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }
+        }
+      ],
+      borderables: [],
+      fontEditable: {
+        get: () => config.font_family || defaultConfig.font_family,
+        set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+      },
+      fontSizeable: {
+        get: () => config.font_size || defaultConfig.font_size,
+        set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+      }
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['hero_title', config.hero_title || defaultConfig.hero_title],
+      ['hero_tagline', config.hero_tagline || defaultConfig.hero_tagline],
+      ['about_heading', config.about_heading || defaultConfig.about_heading],
+      ['cta_heading', config.cta_heading || defaultConfig.cta_heading],
+      ['cta_button_text', config.cta_button_text || defaultConfig.cta_button_text]
+    ])
+  });
+
+  // ===== Heatmap Generation =====
+  function generateHeatmap() {
+    const container = document.getElementById('heatmap');
+    if (!container) return;
+    container.innerHTML = '';
+    const regions = ['NA', 'EU', 'AS', 'AF', 'SA', 'OC', 'ME'];
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 7; col++) {
+        const intensity = Math.random();
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell rounded-sm cursor-pointer';
+        cell.style.height = '20px';
+        cell.style.background = `rgba(0,200,180,${0.1 + intensity * 0.8})`;
+        cell.title = `${regions[col]} - Week ${row + 1}: ${(intensity * 100).toFixed(0)}% resistance`;
+        container.appendChild(cell);
+      }
+    }
+  }
+
+  // ===== Scroll Reveal =====
+  function setupScrollReveal() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+  }
+
+  // ===== Smooth Scroll =====
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Close mobile menu
+        document.getElementById('mobile-menu').classList.add('hidden');
+      }
+    });
+  });
+
+  // ===== Mobile Menu =====
+  document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+  });
+
+  // ===== Nav Scroll Effect =====
+  const appWrapper = document.getElementById('app-wrapper');
+  appWrapper.addEventListener('scroll', () => {
+    const nav = document.getElementById('main-nav');
+    if (appWrapper.scrollTop > 50) {
+      nav.style.background = 'rgba(10,22,40,0.95)';
+      nav.style.borderBottomColor = 'rgba(0,200,180,0.15)';
+    } else {
+      nav.style.background = 'rgba(10,22,40,0.7)';
+      nav.style.borderBottomColor = 'rgba(0,200,180,0.08)';
+    }
+  });
+
+  // ===== Toast =====
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-message').textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // ===== Demo Form =====
+  document.getElementById('demo-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    this.classList.add('hidden');
+    document.getElementById('form-success').classList.remove('hidden');
+    showToast('Demo request submitted successfully!');
+    lucide.createIcons();
+  });
+
+  // ===== Init =====
+  generateHeatmap();
+  setupScrollReveal();
+  lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e0fd25d75847f7b',t:'MTc3NDI5MzkyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
